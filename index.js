@@ -1,6 +1,8 @@
 const express=require("express")
 const cookie=require("cookie-session")
 require("dotenv").config()
+require("./databaseConnect").connect()
+const passportConfig=require("./passport/passport")
 const passport=require("passport")
 const User=require("./userschema")
 const multer=require("multer")
@@ -15,7 +17,7 @@ app.use(
     }))
 const isLoggedIn = (req, res, next) => {
         if (!req.user) {
-          res.redirect("/login");
+          res.redirect("/");
         }
         next();
 }
@@ -25,7 +27,7 @@ app.set("view engine", "ejs");
 app.set("views","views")
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, '/uploads')
+      cb(null, './uploads/')
     },
     filename: function (req, file, cb) {
       const filename = file.originalname
@@ -40,7 +42,7 @@ app.get("/logout",(req,res)=>{
     req.logOut()
     res.redirect("/")
 })
-app.post("/login",(req,res,next)=>{
+app.get("/login",(req,res,next)=>{
   res.render("login")
 })
 app.post("/authenticate",async (req,res,next)=>{
@@ -65,24 +67,23 @@ app.post("/authenticate",async (req,res,next)=>{
 app.post("/credintials",async (req,res,next)=>{
     try{
     const {email,password,role}=req.body
-    const user=await User.find({email})
+    const user=await User.findOne({email})
     user.password=password
     if(role) user.role="student"
     await user.save({validateBeforeSave:false})
-    user.role==="teacher" ? res.render("teacherDashboard") : res.render("studentDashboard",{
-        arrayOfNames:listOfFiles,
-        length:listOfFiles.length
-    })
+    user.role==="teacher" ? res.render("teacherDashboard") : res.render("studentDashboard")
     }
    catch(e){
     console.log(e)
     next(new Error("error in passing signup"))
    }})
-const listOfFiles=[]
+
 app.get("/dashboard",isLoggedIn,async (req,res,next)=>{
+    const listOfFiles=[]
     const fileList=await User.find({role:"teacher"})
+    console.log(fileList)
     _.find(fileList.filePath,(file)=>{
-         listOfFiles.push(file.path.split("\\")[1].split(".")[0])
+         listOfFiles.push(file.path[0].split("\\")[1].split(".")[0])
     })
     res.render("studentDashboard",{
         arrayOfNames:listOfFiles,
@@ -95,16 +96,18 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 app.post("/teacherDashboard",isLoggedIn,upload.array('teacherFile',5),async (req,res,next)=>{
    try{
     const listOfFiles=[]
-    _.find(req.files.teacherFile,(file)=>{
+    _.find(req.files,(file)=>{
         const filePath={
            path:file.path,
            fullName:file.originalname
         }
         listOfFiles.push(filePath)
     })
-    const user=user.find({role:"teacher"})
+    console.log(listOfFiles)
+    const user=await User.findOne({role:"teacher"})
     user.filePath=listOfFiles
-    await user.save({validateBeforeSave:false})
+    await user.save()
+    res.redirect("/")
   }
   catch(e){
     console.log(e)
@@ -112,7 +115,7 @@ app.post("/teacherDashboard",isLoggedIn,upload.array('teacherFile',5),async (req
   }
 })
 app.get("/oAuth",passport.authenticate("google", {
-      scope: ["profile"],
+      scope: ["profile","email"],
        }),
        (req, res) => {
       res.redirect("/")
