@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  <style>
+      body{
+        margin:0px;
+        padding:0px;
+    }
+    h1{
+        text-align: center;
+        margin: auto;
+        /* border:1px solid black; */
+        padding: 30px 0px;
+    }
+    .creditForm{
+        border: 1px solid rgb(74, 59, 59);
+        font-family: 'Baloo Bhai', cursive;
+        display: block;
+        border-radius: 3px;
+        width: 350px;
+         margin: auto;
+    }
+    .emailInput label{
+        text-align: center;
+        display: block;
+    }
+    .emailInput input{
+        display: block;
+        margin: auto;
+        font-size: 16px;
+    }
+    .selectField input{
+        background-color: ghostwhite;
+       
+        
+    }
+    .passwordInput label{
+        text-align: center;
+        display: block;
+    }
+    .passwordInput input{
+        display: block;
+        margin: auto;
+        font-size: 16px;
+    }
+    .register #button{
+        display: block;
+        margin: auto;
+    }
+  </style>
+</head>
+<body>
+    <h1>Welcome to register Page</h1>
+    <div class="creditForm">
+        <form action="/credintials" method="post">
+            <div class="credintialsForm">
+                <div class="emailInput">
+                       <label for="email">Email</label>
+                       <div>
+                       <input type="email" name="email" id="email" value="<%=email%>">
+                        </div>            
+                    </div>
+                <br>
+                <div class="passwordInput">
+                    <label for="password">Password</label>
+                    <div><input type="password" name="password" id="password" placeholder="Enter password"></div>
+                    
+                </div>
+                <br>
+                <div class="selectField">
+                   Student:<input type="radio" name="role"> Teacher:<input type="radio" name="role">
+                </div>
+                <br>
+                 <div class="register">
+                      
+                     <button id="button">Submit</button>
+                 </div>
+                 
+            </div>
+        </form>
+    </div>
+</body>
+</html>

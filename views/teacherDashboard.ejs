@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container{
+            border-radius: 2px solid black;
+            display:flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+        h1{
+            display: flex;
+            justify-content: center;
+        }
+       
+        .fileForm input{
+            display: inline;
+            display: inline;
+            padding-left: 20px;
+            font-size: 16px;
+        }
+
+        .button{
+            display: block;
+            padding-left: 72px;
+        }
+    </style>
+</head>
+<body>
+    <h1>welcome to teacher Dashboard</h1>
+    <div class="container">
+    <form action="/teacherDashboard" method="POST" enctype="multipart/form-data">
+    <div class="fileForm" >
+        
+       File:<input type="file" class="fileUpload" name="teacherFile" multiple>
+    </div>
+    <br>
+    <div class="button">
+       <button class="fileSubmit">submit</button>
+    </div>
+    </form>  
+  </div>
+
+</body>
+</html>
