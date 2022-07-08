@@ -54,16 +54,14 @@ app.post("/authenticate",async (req,res,next)=>{
      const user=await User.find({email})
      if(!user || !user.password===password ) return next(new Error(" do first signup"))
      
-     user.role==="student" ? res.render("studentDashboard") : res.render("teacherDashboard",{
-        arrayOfNames:listOfFiles,
-        length:listOfFiles.length
-     })
+     user.role==="student" ? res.render("studentDashboard") : res.render("teacherDashboard")
     }
     catch(e){
         console.log(e)
         next(new Error("error in authenticate"))
     }
 })
+const listOfFiles=[]
 app.post("/credintials",async (req,res,next)=>{
     try{
     const {email,password,role}=req.body
@@ -79,15 +77,15 @@ app.post("/credintials",async (req,res,next)=>{
    }})
 
 app.get("/dashboard",isLoggedIn,async (req,res,next)=>{
-    const listOfFiles=[]
+    const filesList=[]
     const fileList=await User.find({role:"teacher"})
-    console.log(fileList)
-    _.find(fileList.filePath,(file)=>{
-         listOfFiles.push(file.path[0].split("\\")[1].split(".")[0])
+    
+    _.find(fileList[0].filePath,(file)=>{
+         filesList.push(file.path.split("\\")[1].split(".")[0])
     })
     res.render("studentDashboard",{
-        arrayOfNames:listOfFiles,
-        length:listOfFiles.length
+        arrayOfNames:filesList,
+        length:filesList.length
     })
 })
 app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
@@ -95,7 +93,7 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 })
 app.post("/teacherDashboard",isLoggedIn,upload.array('teacherFile',5),async (req,res,next)=>{
    try{
-    const listOfFiles=[]
+    
     _.find(req.files,(file)=>{
         const filePath={
            path:file.path,
@@ -103,7 +101,7 @@ app.post("/teacherDashboard",isLoggedIn,upload.array('teacherFile',5),async (req
         }
         listOfFiles.push(filePath)
     })
-    console.log(listOfFiles)
+    
     const user=await User.findOne({role:"teacher"})
     user.filePath=listOfFiles
     await user.save()
