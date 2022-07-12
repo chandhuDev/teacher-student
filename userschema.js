@@ -7,22 +7,27 @@ const userSchema=new mongoose.Schema({
     },
     role:{
         type:String,
-        default:"teacher",
+        
         enum:["teacher","student"]
     },
-    password:{
-        type:String
-    },
+    
     filePath:[{
-        path:{
+        public_id:{
             type:String
         },
-        fullName:{
+        url:{
+            type:String
+        },
+        name:{
             type:String
         }
-    }]
-
+    }],
 })
+
+
+userSchema.methods.getToken=function(){
+    return jwt.sign({id:this._id},"chandra@123",{expiresIn:'3h'})
+}
 
 
 module.exports=mongoose.model("User",userSchema)

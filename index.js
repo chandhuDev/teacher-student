@@ -1,128 +1,151 @@
 const express=require("express")
-const cookie=require("cookie-session")
+const cookieSession=require("cookie-session")
 require("dotenv").config()
 require("./databaseConnect").connect()
 const passportConfig=require("./passport/passport")
 const passport=require("passport")
+const cloudinary=require("cloudinary")
+const fileUpload=require("express-fileupload")
 const User=require("./userschema")
-const multer=require("multer")
 var _=require("lodash")
 const app=express()
+
+// cloudinary login
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.API_KEY, 
+    api_secret: process.env.API_SECRET 
+})
+
+//middlewares
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+app.use(fileUpload({
+    useTempFiles:true,
+    tempFileDir:"/temp/"
+}))
+
+
+//cookie
 app.use(
-    cookie({
-      maxAge: '3h',
-      keys: ["chandhu"], // dotenv
-    }))
+    cookieSession({
+      maxAge: 2 * 24 * 60 * 60 * 1000,
+      keys: ["thisischandhu"], // dotenv
+    })
+  );
+
+//checking for authorisation
 const isLoggedIn = (req, res, next) => {
         if (!req.user) {
           res.redirect("/");
         }
-        next();
+     next();
 }
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.set("view engine", "ejs");
 app.set("views","views")
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './uploads/')
-    },
-    filename: function (req, file, cb) {
-      const filename = file.originalname
-      cb(null, file.fieldname + '-' + filename)
-    }
-  })
-const upload = multer({ storage: storage })
+
+//main route
 app.get("/",(req,res,next)=>{
     res.render("main")
 })
+
+//logout route
 app.get("/logout",(req,res)=>{
     req.logOut()
     res.redirect("/")
 })
-app.get("/login",(req,res,next)=>{
-  res.render("login")
-})
-app.post("/authenticate",async (req,res,next)=>{
-    try{
-        const {email,password}=req.body
 
-    if(!email || !password || email==="" || password==="") return next(new Error("error in authenticate"))
-    
-     const user=await User.find({email})
-     if(!user || !user.password===password ) return next(new Error(" do first signup"))
-     
-     user.role==="student" ? res.render("studentDashboard") : res.render("teacherDashboard")
-    }
-    catch(e){
-        console.log(e)
-        next(new Error("error in authenticate"))
-    }
-})
-const listOfFiles=[]
+//registering the user details route
 app.post("/credintials",async (req,res,next)=>{
     try{
-    const {email,password,role}=req.body
+    const {email,role}=req.body
     const user=await User.findOne({email})
-    user.password=password
-    if(role) user.role="student"
+    role=='on'? user.role="student" : user.role="teacher"
     await user.save({validateBeforeSave:false})
-    user.role==="teacher" ? res.render("teacherDashboard") : res.render("studentDashboard")
+    user.role=="teacher" ? res.render("teacherDashboard") : res.redirect("/dashboard")
     }
    catch(e){
-    console.log(e)
     next(new Error("error in passing signup"))
-   }})
+   }
+})
 
+//route for displaying the files in the database
 app.get("/dashboard",isLoggedIn,async (req,res,next)=>{
-    const filesList=[]
-    const fileList=await User.find({role:"teacher"})
-    
-    _.find(fileList[0].filePath,(file)=>{
-         filesList.push(file.path.split("\\")[1].split(".")[0])
+    const listNames=[]
+    const listUrl=[]
+    const fileList=await User.findOne({role:"teacher"})
+    _.find(fileList.filePath,(file)=>{
+         listUrl.push(file.url)
+         listNames.push(file.name)
     })
     res.render("studentDashboard",{
-        arrayOfNames:filesList,
-        length:filesList.length
-    })
-})
-app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
-   if(req.user.role==="teacher") return res.render("teacherDashboard")
-})
-app.post("/teacherDashboard",isLoggedIn,upload.array('teacherFile',5),async (req,res,next)=>{
-   try{
-    
-    _.find(req.files,(file)=>{
-        const filePath={
-           path:file.path,
-           fullName:file.originalname
+        arrayOfNames:listNames,
+        length:listNames.length,
+        arrayOfFiles:listUrl
+    },(err,result)=>{
+        if(err) {
+          next(new Error(err))
         }
-        listOfFiles.push(filePath)
+        res.send(result)
     })
-    
+})
+
+//route for uploading the files for teacher
+app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
+    if(req.user){
+        if(req.user.role==="teacher") return res.render("teacherDashboard")
+        res.redirect("/")
+    }
+    return res.redirect("/")
+})
+
+//route for teacher sending the files to the database
+const list1=[]
+app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
+   try{
+    for(let index=0;index < req.files.teacherFile.length; index++){
+         const result=await cloudinary.v2.uploader.upload(req.files.teacherFile[index].tempFilePath,
+            {
+                folder:"teacher-student-Dashboard",
+                resource_type: "auto",
+                use_filename: true, 
+                unique_filename: false
+            })
+            list1.push({ public_id:result.public_id,url:result.url,name:req.files.teacherFile[index].name })
+        }
     const user=await User.findOne({role:"teacher"})
-    user.filePath=listOfFiles
+    user.filePath=list1
     await user.save()
     res.redirect("/")
-  }
-  catch(e){
-    console.log(e)
-    next(new Error("error in teacherDashboard"))
-  }
+    }
+    catch(e){
+        console.log(e.message)
+        next(new Error("error in teacherDashboard"))
+      }
 })
+  
+
+//route for authentication of google
 app.get("/oAuth",passport.authenticate("google", {
       scope: ["profile","email"],
        }),
        (req, res) => {
       res.redirect("/")
     })
+
+//route for callback after authentication of google
 app.get("/register",passport.authenticate("google"),(req,res)=>{
+    if(req.user.role) return res.redirect("/")
     res.render("register",{
         email:req.user.email
     })
 })
+
+
+//server listenoing at 5000 port
 app.listen(5000,(req,res)=>{
     console.log('successfully listening')
 })
