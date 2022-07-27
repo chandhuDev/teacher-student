@@ -18,6 +18,7 @@ cloudinary.config({
 })
 
 //middlewares
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(fileUpload({
@@ -106,15 +107,18 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 const list1=[]
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
-    for(let index=0;index <=req.files.teacherFile.length; index++){
-         const result=await cloudinary.v2.uploader.upload(req.files.teacherFile[index].tempFilePath,
+    console.log(typeof req?.files?.teacherFile)
+    for(let value of req.files?.teacherFile){
+       //console.log(req.files?.teacherFile[index]?.tempFilePath)
+        console.log(value)
+         const result=await cloudinary.v2.uploader.upload(value.tempFilePath,
             {
                 folder:"teacher-student-Dashboard",
                 resource_type: "auto",
                 use_filename: true, 
                 unique_filename: false
             })
-            list1.push({ public_id:result.public_id,url:result.url,name:req.files.teacherFile[index].name })
+            list1.push({ public_id:result.public_id,url:result.url,name:value.name })
         }
     const user=await User.findOne({role:"teacher"})
     user.filePath=list1
