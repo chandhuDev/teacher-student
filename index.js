@@ -107,19 +107,18 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 const list1=[]
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
-    //console.log(typeof req?.files?.teacherFile)
-    for(let value in req?.files?.teacherFile){
-       //console.log(req.files?.teacherFile[index]?.tempFilePath)
-        console.log(value)
-         const result=await cloudinary.v2.uploader.upload(value.tempFilePath,
-            {
-                folder:"teacher-student-Dashboard",
-                resource_type: "auto",
-                use_filename: true, 
-                unique_filename: false
-            })
+    let result
+    if(req?.files?.teacherFile?.length>1) {
+
+        for(let value of req?.files?.teacherFile){
+            result=await upload(value)
             list1.push({ public_id:result.public_id,url:result.url,name:value.name })
-        }
+            }
+     }else{
+        result=await cloudinary.v2.uploader.upload(req?.files?.teacherFile?.tempFilePath)
+        list1.push({ public_id:result.public_id,url:result.url,name:req?.files?.teacherFile?.name })
+    }
+   
     const user=await User.findOne({role:"teacher"})
     user.filePath=list1
     await user.save()
@@ -130,6 +129,16 @@ app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
         next(new Error("error in teacherDashboard"))
       }
 })
+
+async function upload(value){
+   return await cloudinary.v2.uploader.upload(value.tempFilePath,
+        {
+            folder:"teacher-student-Dashboard",
+            resource_type: "auto",
+            use_filename: true, 
+            unique_filename: false
+        })
+}
   
 
 //route for authentication of google
