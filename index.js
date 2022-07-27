@@ -106,7 +106,7 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 const list1=[]
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
-    for(let index=0;index < req.files.teacherFile.length; index++){
+    for(let index=0;index <=req.files.teacherFile.length; index++){
          const result=await cloudinary.v2.uploader.upload(req.files.teacherFile[index].tempFilePath,
             {
                 folder:"teacher-student-Dashboard",
