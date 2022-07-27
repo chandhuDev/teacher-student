@@ -107,7 +107,7 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 const list1=[]
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
-    console.log(typeof req?.files?.teacherFile)
+    //console.log(typeof req?.files?.teacherFile)
     for(let value of req.files?.teacherFile){
        //console.log(req.files?.teacherFile[index]?.tempFilePath)
         console.log(value)
