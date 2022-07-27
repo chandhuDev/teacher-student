@@ -108,7 +108,7 @@ const list1=[]
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
     //console.log(typeof req?.files?.teacherFile)
-    for(let value of req.files?.teacherFile){
+    req?.files?.teacherFile.forEach(async value=>{
        //console.log(req.files?.teacherFile[index]?.tempFilePath)
         console.log(value)
          const result=await cloudinary.v2.uploader.upload(value.tempFilePath,
@@ -119,7 +119,7 @@ app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
                 unique_filename: false
             })
             list1.push({ public_id:result.public_id,url:result.url,name:value.name })
-        }
+        })
     const user=await User.findOne({role:"teacher"})
     user.filePath=list1
     await user.save()
