@@ -8,6 +8,7 @@ const cloudinary=require("cloudinary")
 const fileUpload=require("express-fileupload")
 const User=require("./userschema")
 var _=require("lodash")
+const cors=require("cors")
 const app=express()
 
 // cloudinary login
