@@ -108,10 +108,11 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 })
 
 //route for teacher sending the files to the database
-const list1=[]
+
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
     let result
+    const list=[]
     if(req?.files?.teacherFile?.length>1) {
 
         for(let value of req?.files?.teacherFile){
