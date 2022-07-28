@@ -112,7 +112,7 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
     let result
-    const list=[]
+    let list1=[]
     if(req?.files?.teacherFile?.length>1) {
 
         for(let value of req?.files?.teacherFile){
@@ -124,9 +124,12 @@ app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
         list1.push({ public_id:result.public_id,url:result.url,name:req?.files?.teacherFile?.name })
     }
    
-    const user=await User.findOne({role:"teacher"})
-    user.filePath=list1
-    await user.save()
+    
+    await User.updateOne(
+        { role:"teacher" }, 
+        { $push: { filePath: list1 } }
+      );
+      
     res.redirect("/")
     }
     catch(e){
