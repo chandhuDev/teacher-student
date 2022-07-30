@@ -165,8 +165,8 @@ app.get("/register",passport.authenticate("google"),(req,res)=>{
     })
 })
 
-
+const PORT=process.env.PORT || 5000
 //server listenoing at 5000 port
-app.listen(process.env.PORT,(req,res)=>{
+app.listen(PORT,(req,res)=>{
     console.log('successfully listening')
 })
