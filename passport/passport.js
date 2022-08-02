@@ -19,7 +19,7 @@ console.log(process.env.host)
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://process.env.host:PORT/register"
+    callbackURL: "http://localhost:PORT/register"
   },
   function(accessToken, refreshToken, profile, next) {
     
