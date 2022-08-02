@@ -19,7 +19,7 @@ const PORT=process.env.PORT || 5000
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://student-teachers-app.herokuapp.com:PORT/register"
+    callbackURL: "https://student-teachers-app.herokuapp.com/register"
   },
   function(accessToken, refreshToken, profile, next) {
     
