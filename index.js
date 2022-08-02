@@ -2,6 +2,7 @@ const express=require("express")
 const cookieSession=require("cookie-session")
 require("dotenv").config()
 require("./databaseConnect").connect()
+
 const passportConfig=require("./passport/passport")
 const passport=require("passport")
 const cloudinary=require("cloudinary")
@@ -166,7 +167,7 @@ app.get("/register",passport.authenticate("google"),(req,res)=>{
 })
 
 const PORT=process.env.PORT || 5000
-//server listenoing at 5000 port
+
 app.listen(PORT,(req,res)=>{
     console.log('successfully listening')
 })
