@@ -19,7 +19,7 @@ const PORT=process.env.PORT || 5000
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "/register"
+    callbackURL: `${process.env.HOST}:${PORT}/register`
   },
   function(accessToken, refreshToken, profile, next) {
     
