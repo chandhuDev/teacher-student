@@ -15,6 +15,7 @@ passport.deserializeUser(function (id, done) {
 
 
 const PORT=process.env.PORT || 5000
+console.log(process.env.host)
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
