@@ -159,7 +159,7 @@ app.get("/oAuth",passport.authenticate("google", {
     })
 
 //route for callback after authentication of google
-app.get("/register",passport.authenticate("google"),(req,res)=>{
+app.get("/register",passport.authenticate("google", { failureRedirect: '/', failureMessage: true }),(req,res)=>{
     if(req.user.role) return res.redirect("/")
     res.render("register",{
         email:req.user.email
