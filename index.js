@@ -116,6 +116,7 @@ app.post("/teacherDashboard",isLoggedIn,fileupload.array('teacherFile',20),async
    try{
     let result
     let list1=[]
+    console.log(req?.files?.teacherFile.path)
     if(req?.files?.teacherFile?.length>1) {
          for(let value of req?.files?.teacherFile){
             result=await upload(value)
@@ -135,7 +136,7 @@ app.post("/teacherDashboard",isLoggedIn,fileupload.array('teacherFile',20),async
     res.redirect("/")
     }
     catch(e){
-        console.log(e.message)
+        console.log(e)
         next(new Error("error in teacherDashboard"))
       }
 })
