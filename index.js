@@ -2,7 +2,7 @@ const express=require("express")
 const cookieSession=require("cookie-session")
 require("dotenv").config()
 require("./databaseConnect").connect()
-
+const multer=require("multer")
 const passportConfig=require("./passport/passport")
 const passport=require("passport")
 const cloudinary=require("cloudinary")
@@ -26,10 +26,12 @@ app.use(express.urlencoded({extended:true}))
 app.use(cors({
     origin:'*'
 }))
-app.use(fileUpload({
-    useTempFiles:true,
-    tempFileDir:"/temp/"
-}))
+// app.use(fileUpload({
+//     useTempFiles:true,
+//     tempFileDir:"/temp/"
+// }))
+
+const fileupload=multer({dest:'uploads/'})
 
 
 //cookie
@@ -110,18 +112,17 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 
 //route for teacher sending the files to the database
 
-app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
+app.post("/teacherDashboard",isLoggedIn,fileupload.array('teacherFile',20),async (req,res,next)=>{
    try{
     let result
     let list1=[]
     if(req?.files?.teacherFile?.length>1) {
-
-        for(let value of req?.files?.teacherFile){
+         for(let value of req?.files?.teacherFile){
             result=await upload(value)
             list1.push({ public_id:result.public_id,url:result.url,name:value.name })
             }
      }else{
-        result=await cloudinary.v2.uploader.upload(req?.files?.teacherFile?.tempFilePath)
+        result=await cloudinary.v2.uploader.upload(req?.files?.teacherFile?.path)
         list1.push({ public_id:result.public_id,url:result.url,name:req?.files?.teacherFile?.name })
     }
    
@@ -140,7 +141,7 @@ app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
 })
 
 async function upload(value){
-   return await cloudinary.v2.uploader.upload(value.tempFilePath,
+   return await cloudinary.v2.uploader.upload(value.path,
         {
             folder:"teacher-student-Dashboard",
             resource_type: "auto",
