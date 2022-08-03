@@ -2,7 +2,6 @@ const express=require("express")
 const cookieSession=require("cookie-session")
 require("dotenv").config()
 require("./databaseConnect").connect()
-const multer=require("multer")
 const passportConfig=require("./passport/passport")
 const passport=require("passport")
 const cloudinary=require("cloudinary")
@@ -26,26 +25,13 @@ app.use(express.urlencoded({extended:true}))
 app.use(cors({
     origin:'*'
 }))
-// app.use('/', express.static(__dirname + '/public'));
+
 app.use(fileUpload({
     useTempFiles:true,
     tempFileDir:"/tmp/"
 }))
 
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//       cb(null, './public/storage')
-//     },
-//     filename: function (req, file, cb) {
-//         console.log(file);
-//         //get the file mimetype ie 'image/jpeg' split and prefer the second value ie'jpeg'
-//         const ext = file.mimetype.split('/')[1];
-//         //set the file fieldname to a unique name containing the original name, current datetime and the extension.
-//         cb(null, file.fieldname + '-' + Date.now() + '.'+ext);
-      
-//     }
-//   })
-// const fileupload=multer({ storage: storage })
+
 
 
 //cookie
