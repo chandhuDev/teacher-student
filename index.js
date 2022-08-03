@@ -29,7 +29,7 @@ app.use(cors({
 // app.use('/', express.static(__dirname + '/public'));
 app.use(fileUpload({
     useTempFiles:true,
-    tempFileDir:"/temp/"
+    tempFileDir:"/tmp/"
 }))
 
 // const storage = multer.diskStorage({
