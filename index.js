@@ -26,25 +26,26 @@ app.use(express.urlencoded({extended:true}))
 app.use(cors({
     origin:'*'
 }))
-// app.use(fileUpload({
-//     useTempFiles:true,
-//     tempFileDir:"/temp/"
-// }))
+// app.use('/', express.static(__dirname + '/public'));
+app.use(fileUpload({
+    useTempFiles:true,
+    tempFileDir:"/temp/"
+}))
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './tmp/')
-    },
-    filename: function (req, file, cb) {
-        console.log(file);
-        //get the file mimetype ie 'image/jpeg' split and prefer the second value ie'jpeg'
-        const ext = file.mimetype.split('/')[1];
-        //set the file fieldname to a unique name containing the original name, current datetime and the extension.
-        cb(null, file.fieldname + '-' + Date.now() + '.'+ext);
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//       cb(null, './public/storage')
+//     },
+//     filename: function (req, file, cb) {
+//         console.log(file);
+//         //get the file mimetype ie 'image/jpeg' split and prefer the second value ie'jpeg'
+//         const ext = file.mimetype.split('/')[1];
+//         //set the file fieldname to a unique name containing the original name, current datetime and the extension.
+//         cb(null, file.fieldname + '-' + Date.now() + '.'+ext);
       
-    }
-  })
-const fileupload=multer({ storage: storage })
+//     }
+//   })
+// const fileupload=multer({ storage: storage })
 
 
 //cookie
@@ -125,18 +126,18 @@ app.get("/upLoadFiles",isLoggedIn,(req,res,next)=>{
 
 //route for teacher sending the files to the database
 
-app.post("/teacherDashboard",isLoggedIn,fileupload.array('teacherFile',20),async (req,res,next)=>{
+app.post("/teacherDashboard",isLoggedIn,async (req,res,next)=>{
    try{
     let result
     let list1=[]
-    console.log(req?.files?.teacherFile.path)
+    
     if(req?.files?.teacherFile?.length>1) {
          for(let value of req?.files?.teacherFile){
             result=await upload(value)
             list1.push({ public_id:result.public_id,url:result.url,name:value.name })
             }
      }else{
-        result=await cloudinary.v2.uploader.upload(req?.files?.teacherFile?.path)
+        result=await cloudinary.v2.uploader.upload(req?.files?.teacherFile?.tempFilePath)
         list1.push({ public_id:result.public_id,url:result.url,name:req?.files?.teacherFile?.name })
     }
    
@@ -155,7 +156,7 @@ app.post("/teacherDashboard",isLoggedIn,fileupload.array('teacherFile',20),async
 })
 
 async function upload(value){
-   return await cloudinary.v2.uploader.upload(value.path,
+   return await cloudinary.v2.uploader.upload(value.tempFilePath,
         {
             folder:"teacher-student-Dashboard",
             resource_type: "auto",
