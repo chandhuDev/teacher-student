@@ -31,7 +31,20 @@ app.use(cors({
 //     tempFileDir:"/temp/"
 // }))
 
-const fileupload=multer({dest:'uploads/'})
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './tmp/')
+    },
+    filename: function (req, file, cb) {
+        console.log(file);
+        //get the file mimetype ie 'image/jpeg' split and prefer the second value ie'jpeg'
+        const ext = file.mimetype.split('/')[1];
+        //set the file fieldname to a unique name containing the original name, current datetime and the extension.
+        cb(null, file.fieldname + '-' + Date.now() + '.'+ext);
+      
+    }
+  })
+const fileupload=multer({ storage: storage })
 
 
 //cookie
